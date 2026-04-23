@@ -24,7 +24,6 @@ export default defineConfig([
     files: ['src/tests/**/*.ts'],
     languageOptions: {
       globals: {
-        ...globals.mocha,
         ...globals.node
       }
     },

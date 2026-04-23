@@ -1,11 +1,9 @@
-import { expect } from 'chai'
-
 import DB from '../../db'
 import { getDaysMS } from '../../dates'
 import { getSheetsWithEntriesInLastWeek } from '../../utils'
 
-describe('utils:get_sheets_with_entries_in_last_week', function () {
-  it('should only return sheets with entries within the last week', function () {
+describe('utils:get_sheets_with_entries_in_last_week', () => {
+  it('should only return sheets with entries within the last week', () => {
     const startA = new Date(Date.now() - getDaysMS(5))
     const endA = new Date(Date.now() - getDaysMS(3))
 
@@ -20,6 +18,6 @@ describe('utils:get_sheets_with_entries_in_last_week', function () {
 
     const results = getSheetsWithEntriesInLastWeek([sheetA, sheetB])
 
-    expect(results).to.have.length(1)
+    expect(results).toHaveLength(1)
   })
 })

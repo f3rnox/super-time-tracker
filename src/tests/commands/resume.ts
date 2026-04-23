@@ -1,14 +1,10 @@
 import _last from 'lodash/last'
 import { type Argv } from 'yargs'
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
 
 import DB from '../../db'
 import getTestDB from '../get_test_db'
 import { type TimeSheetEntry } from '../../types'
 import { type ResumeCommandArgs, handler } from '../../commands/resume'
-
-chai.use(chaiAsPromised)
 
 const db = getTestDB()
 const getArgs = (overrides?: Record<string, unknown>): ResumeCommandArgs => ({
@@ -17,28 +13,26 @@ const getArgs = (overrides?: Record<string, unknown>): ResumeCommandArgs => ({
   ...(overrides ?? {})
 })
 
-describe('commands:resume:handler', function () {
-  this.timeout(10 * 1000)
-
-  beforeEach(async function () {
+describe('commands:resume:handler', () => {
+  beforeEach(async () => {
     await db.load()
   })
 
-  afterEach(async function () {
+  afterEach(async () => {
     await db.delete()
   })
 
-  it('throws an error if there is no active sheet', async function () {
+  it('throws an error if there is no active sheet', async () => {
     if (db.db !== null) {
       db.db.activeSheetName = null
     }
 
     const p = handler(getArgs())
 
-    await chai.expect(p).to.be.rejectedWith('No active sheet')
-  })
+    await expect(p).rejects.toThrow('No active sheet')
+  }, 10000)
 
-  it('throws an error if there is no recent entry for the active sheet', async function () {
+  it('throws an error if there is no recent entry for the active sheet', async () => {
     const sheet = DB.genSheet('test-sheet')
     const { name: sheetName } = sheet
 
@@ -51,12 +45,10 @@ describe('commands:resume:handler', function () {
 
     const p = handler(getArgs())
 
-    await chai
-      .expect(p)
-      .to.be.rejectedWith(`No entries found in sheet ${sheetName}`)
-  })
+    await expect(p).rejects.toThrow(`No entries found in sheet ${sheetName}`)
+  }, 10000)
 
-  it('throws an error if the active sheet already has a running entry', async function () {
+  it('throws an error if the active sheet already has a running entry', async () => {
     const entryA = DB.genSheetEntry(
       0,
       'test-a',
@@ -77,14 +69,12 @@ describe('commands:resume:handler', function () {
 
     const p = handler(getArgs())
 
-    await chai
-      .expect(p)
-      .to.be.rejectedWith(
-        `Sheet ${sheetName} already has an active entry (${entryB.id}: ${entryB.description})`
-      )
-  })
+    await expect(p).rejects.toThrow(
+      `Sheet ${sheetName} already has an active entry (${entryB.id}: ${entryB.description})`
+    )
+  }, 10000)
 
-  it('creates a new entry with the same description as the most recently ended entry and adds it to the sheet', async function () {
+  it('creates a new entry with the same description as the most recently ended entry and adds it to the sheet', async () => {
     const entryA = DB.genSheetEntry(0, 'test-a', new Date(), new Date())
     const entryB = DB.genSheetEntry(
       0,
@@ -107,9 +97,9 @@ describe('commands:resume:handler', function () {
     const { activeEntryID } = sheet
     const newEntry = _last(sheet.entries) as unknown as TimeSheetEntry
 
-    expect(activeEntryID).to.equal(newEntry.id)
-    expect(newEntry.description).to.equal(entryB.description)
-    expect(+newEntry.start).to.be.closeTo(Date.now(), 1000)
-    expect(newEntry.end).to.be.null
-  })
+    expect(activeEntryID).toBe(newEntry.id)
+    expect(newEntry.description).toBe(entryB.description)
+    expect(Math.abs(+newEntry.start - Date.now())).toBeLessThanOrEqual(1000)
+    expect(newEntry.end).toBeNull()
+  }, 10000)
 })

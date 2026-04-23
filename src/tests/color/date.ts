@@ -1,32 +1,19 @@
 import isAnsi from 'is-ansi'
-import { expect } from 'chai'
 
 import { clDate } from '../../color'
 
 const { CI } = process.env
 
-describe('color:date', function () {
-  it('colors the provided string', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clDate('2018-01-01'))).to.equal(true)
+describe('color:date', () => {
+  it.skipIf(CI)('colors the provided string', () => {
+    expect(isAnsi(clDate('2018-01-01'))).toBe(true)
   })
 
-  it('accepts numeric timestamps', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clDate(Date.now()))).to.equal(true)
+  it.skipIf(CI)('accepts numeric timestamps', () => {
+    expect(isAnsi(clDate(Date.now()))).toBe(true)
   })
 
-  it('accepts date objects', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clDate(new Date()))).to.equal(true)
+  it.skipIf(CI)('accepts date objects', () => {
+    expect(isAnsi(clDate(new Date()))).toBe(true)
   })
 })

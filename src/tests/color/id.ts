@@ -1,24 +1,15 @@
 import isAnsi from 'is-ansi'
-import { expect } from 'chai'
 
 import { clID } from '../../color'
 
 const { CI } = process.env
 
-describe('color:id', function () {
-  it('colors the provided string', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clID('id'))).to.equal(true)
+describe('color:id', () => {
+  it.skipIf(CI)('colors the provided string', () => {
+    expect(isAnsi(clID('id'))).toBe(true)
   })
 
-  it('accepts numeric values', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clID(42))).to.equal(true)
+  it.skipIf(CI)('accepts numeric values', () => {
+    expect(isAnsi(clID(42))).toBe(true)
   })
 })

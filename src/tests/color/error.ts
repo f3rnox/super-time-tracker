@@ -1,24 +1,15 @@
 import isAnsi from 'is-ansi'
-import { expect } from 'chai'
 
 import { clError } from '../../color'
 
 const { CI } = process.env
 
-describe('color:error', function () {
-  it('colors the provided string', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clError('Some error'))).to.equal(true)
+describe('color:error', () => {
+  it.skipIf(CI)('colors the provided string', () => {
+    expect(isAnsi(clError('Some error'))).toBe(true)
   })
 
-  it('accepts error objects', function () {
-    if (CI) {
-      return this.skip()
-    }
-
-    expect(isAnsi(clError(new Error('Some error')))).to.equal(true)
+  it.skipIf(CI)('accepts error objects', () => {
+    expect(isAnsi(clError(new Error('Some error')))).toBe(true)
   })
 })

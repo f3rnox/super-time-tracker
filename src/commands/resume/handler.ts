@@ -15,6 +15,7 @@ const handler = async (args: ResumeCommandArgs): Promise<void> => {
   const { description, end, tags, id } = entry
   const { name } = sheet
   const tagsUI = (tags ?? []).map(clTag).join(' ')
+  const sheetLabel = clSheet(name + ':')
 
   if (end === null) {
     throw new Error(
@@ -25,7 +26,7 @@ const handler = async (args: ResumeCommandArgs): Promise<void> => {
   await db.addActiveSheetEntry({ sheet, description, tags })
 
   log(
-    `${clSheet(`${name}:`)} ${clText('resumed')} ${clHighlight(description)} ${tagsUI}`
+    `${sheetLabel} ${clText('resumed')} ${clHighlight(description)} ${tagsUI}`
   )
 }
 

@@ -1,28 +1,13 @@
-import sAgo from 's-ago'
-import _map from 'lodash/map'
-import _sum from 'lodash/sum'
-import parseDate from 'time-speak'
 import _isEmpty from 'lodash/isEmpty'
-import _isUndefined from 'lodash/isUndefined'
 
 import log from '../../log'
 import { printSheets } from '../../print'
-import { type TimeSheet } from '../../types'
 import { type ListCommandArgs } from './types'
-import { getPastDay, getStartOfDay } from '../../dates'
-import {
-  clDate,
-  clDuration,
-  clHighlight,
-  clHighlightRed,
-  clText
-} from '../../color'
-
-import {
-  getDurationLangString,
-  getFirstPastDateWithEntries,
-  getSheetsWithEntriesSinceDate
-} from '../../utils'
+import getListFilteredSheets from './get_list_filtered_sheets'
+import getListSheetsToList from './get_list_sheets_to_list'
+import getListSinceDate from './get_list_since_date'
+import logListSheetsAfterPrint from './log_list_sheets_after_print'
+import logListSheetsHeader from './log_list_sheets_header'
 
 const handler = (args: ListCommandArgs): void => {
   const {
@@ -36,9 +21,7 @@ const handler = (args: ListCommandArgs): void => {
     concise,
     humanize,
     absolute,
-    yesterday,
-    allSheets,
-    sheets: sheetNames
+    yesterday
   } = args
 
   if (help) {
@@ -52,108 +35,33 @@ const handler = (args: ListCommandArgs): void => {
     )
   }
 
-  const activeSheetName = db.getActiveSheetName()
   const dbSheets = db.getAllSheets()
-
-  // prettier-ignore
-  const sheetsToList: TimeSheet[] = !_isUndefined(sheetNames)
-    ? sheetNames.map((sheetName: string): TimeSheet => db.getSheet(sheetName))
-    : allSheets
-      ? dbSheets
-      : activeSheetName === null
-        ? []
-        : [db.getActiveSheet()]
+  const sheetsToList = getListSheetsToList(args, dbSheets)
 
   if (_isEmpty(sheetsToList)) {
     throw new Error('No relevant sheets found')
   }
 
-  const sinceDate =
-    !_isUndefined(since) && !_isEmpty(since)
-      ? new Date(+parseDate(since))
-      : today
-        ? getStartOfDay()
-        : yesterday
-          ? getStartOfDay(getPastDay(1))
-          : all
-            ? new Date(0)
-            : getFirstPastDateWithEntries(sheetsToList)
+  const sinceDate = getListSinceDate(sheetsToList, args)
 
-  const sheetsFilteredByDate =
-    sinceDate === null
-      ? sheetsToList
-      : getSheetsWithEntriesSinceDate(sheetsToList, sinceDate)
+  const filteredSheets = getListFilteredSheets(sheetsToList, sinceDate, filter)
 
-  // TODO: Extract
-  const filteredSheets = sheetsFilteredByDate
-    .map(({ entries, ...otherSheetData }) => ({
-      ...otherSheetData,
-      entries: entries.filter(({ description }) =>
-        _isUndefined(filter) || _isEmpty(filter)
-          ? true
-          : description.toLowerCase().includes(filter.toLowerCase())
-      )
-    }))
-    .filter(({ entries }) => entries.length > 0)
-
-  if (today) {
-    log(
-      `${clText('* Showing')} ${clHighlight(
-        `${filteredSheets.length}`
-      )} ${clText('sheets for today')}`
-    )
-  } else if (sinceDate !== null) {
-    log(
-      `${clText('* Showing sheets since')} ${clHighlight(
-        sinceDate.toLocaleString()
-      )} ${clDate(`[${sAgo(sinceDate)}]`)}`
-    )
-  } else {
-    log(
-      `${clText('* Showing')} ${clHighlight(
-        `${filteredSheets.length}`
-      )} ${clText('sheets')}`
-    )
-  }
+  logListSheetsHeader({
+    today,
+    sinceDate,
+    filteredCount: filteredSheets.length
+  })
 
   log('')
 
   printSheets(filteredSheets, absolute !== true, humanize, concise)
 
-  if (!all) {
-    const sheetsNotShownCount = dbSheets.length - filteredSheets.length
-
-    log('')
-    log(
-      `${clText('*')} ${clHighlightRed(
-        `${sheetsNotShownCount}`
-      )} ${clText('Sheets not shown')}. ${clText('use')} ${clHighlightRed(
-        '--all'
-      )} ${clText('to show')}`
-    )
-  } else {
-    const totalDuration = _sum(
-      filteredSheets.map(({ entries }) =>
-        _sum(
-          entries.map(({ end, start }) =>
-            end === null ? Date.now() - +start : +end - +start
-          )
-        )
-      )
-    )
-
-    const totalDurationUI = getDurationLangString(totalDuration, humanize)
-    const totalEntryCount = _sum(_map(filteredSheets, 'entries.length'))
-
-    log('')
-    log(
-      `${clText('* Total tracked duration:')} ${clDuration(`[${totalDurationUI}]`)}`
-    )
-
-    log(
-      `${clText('* Total entry count:')} ${clHighlight(`${totalEntryCount}`)}`
-    )
-  }
+  logListSheetsAfterPrint({
+    all,
+    filteredSheets,
+    totalDbSheets: dbSheets.length,
+    humanize
+  })
 }
 
 export default handler

@@ -1,11 +1,9 @@
-import { expect } from 'chai'
-
 import DB from '../../db'
 import { getPastDay } from '../../dates'
 import { getSheetsWithEntriesSinceDate } from '../../utils'
 
-describe('utils:get_sheets_with_entries_since_date', function () {
-  it('should only return sheets with entries since the given date', function () {
+describe('utils:get_sheets_with_entries_since_date', () => {
+  it('should only return sheets with entries since the given date', () => {
     const sinceDate = getPastDay(5)
     const entryA = DB.genSheetEntry(0, 'test-a', getPastDay(3), getPastDay(2))
 
@@ -16,7 +14,7 @@ describe('utils:get_sheets_with_entries_since_date', function () {
 
     const results = getSheetsWithEntriesSinceDate([sheetA, sheetB], sinceDate)
 
-    expect(results).to.have.length(1)
-    expect(results[0]).to.deep.equal(sheetA)
+    expect(results).toHaveLength(1)
+    expect(results[0]).toEqual(sheetA)
   })
 })

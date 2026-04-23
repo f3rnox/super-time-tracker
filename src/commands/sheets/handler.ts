@@ -34,12 +34,15 @@ const handler = (args: SheetsCommandArgs): void => {
     throw new Error('No time sheets exist')
   }
 
-  const sinceDate =
-    !_isUndefined(since) && !_isEmpty(since)
-      ? new Date(+parseDate(since))
-      : today
-        ? getStartOfDay()
-        : new Date(0)
+  let sinceDate: Date | null
+
+  if (!_isUndefined(since) && !_isEmpty(since)) {
+    sinceDate = new Date(+parseDate(since))
+  } else if (today) {
+    sinceDate = getStartOfDay()
+  } else {
+    sinceDate = new Date(0)
+  }
 
   const filteredSheets =
     sinceDate === null
@@ -56,17 +59,19 @@ const handler = (args: SheetsCommandArgs): void => {
         `${filteredSheets.length}`
       )} ${clText('sheets for today')}`
     )
-  } else if (sinceDate !== null) {
-    log(
-      `${clText('* Showing sheets since')} ${clHighlight(
-        sinceDate.toLocaleString()
-      )} ${clDate(`[${ago(sinceDate)}]`)}`
-    )
-  } else {
+  } else if (sinceDate === null) {
     log(
       `${clText('* Showing')} ${clHighlight(
         `${filteredSheets.length}`
       )} ${clText('sheets')}`
+    )
+  } else {
+    const sinceDateAgoText = clDate(`[${ago(sinceDate)}]`)
+
+    log(
+      `${clText('* Showing sheets since')} ${clHighlight(
+        sinceDate.toLocaleString()
+      )} ${sinceDateAgoText}`
     )
   }
 
@@ -101,9 +106,9 @@ const handler = (args: SheetsCommandArgs): void => {
 
   log('')
   log(
-    `${clText('Total duration')}: ${`[${clHighlight(
+    `${clText('Total duration')}: [${clHighlight(
       getDurationLangString(totalDuration, humanize)
-    )}]`}`
+    )}]`
   )
   log('')
   log(clText('* Last 5 active sheets'))

@@ -1,10 +1,8 @@
-import { expect } from 'chai'
-
 import { getHoursMS } from '../../../dates'
 
-describe('utils:dates:get_hours_ms', function () {
-  it('returns correct values', function () {
-    expect(getHoursMS(1)).to.equal(3600000)
-    expect(getHoursMS(2)).to.equal(7200000)
+describe('utils:dates:get_hours_ms', () => {
+  it('returns correct values', () => {
+    expect(getHoursMS(1)).toBe(3600000)
+    expect(getHoursMS(2)).toBe(7200000)
   })
 })

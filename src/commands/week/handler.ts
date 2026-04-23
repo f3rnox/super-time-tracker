@@ -87,12 +87,12 @@ const handler = (args: WeekCommandArgs): void => {
     : lastWeekDate.toLocaleDateString()
 
   log(
-    `${clText('* Week Report [showing data since')} ${clDate(`${lastWeekDateUI}`)}${clText(']')}`
+    `${clText('* Week Report [showing data since')} ${clDate(lastWeekDateUI)}${clText(']')}`
   )
   log(
     `${clText('* Total duration:')} ${clDuration(
       getDurationLangString(totalDuration, humanize)
-    )} ${clHighlight(`[${totalEntries} entries]`)}`
+    )} ${clHighlight('[' + totalEntries + ' entries]')}`
   )
 
   log('')
@@ -130,9 +130,9 @@ const handler = (args: WeekCommandArgs): void => {
       const { duration, entries } = result
 
       log(
-        `${clDate(`- ${dateWeekday} ${dateString}`)}: ${clHighlight(
-          `${entries} entries`
-        )} ${clDuration(`[${getDurationLangString(duration, humanize)}]`)}`
+        `${clDate('- ' + dateWeekday + ' ' + dateString)}: ${clHighlight(
+          entries + ' entries'
+        )} ${clDuration('[' + getDurationLangString(duration, humanize) + ']')}`
       )
     })
   } else {
@@ -168,10 +168,10 @@ const handler = (args: WeekCommandArgs): void => {
         }
 
         log(
-          `  ${clDate(`- ${dateWeekday}`)} ${clHighlightRed(
-            `(${dateStringUI})`
-          )}: ${clHighlight(`${entries} entries,`)} ${clDuration(
-            `[${getDurationLangString(duration, humanize)}]`
+          `  ${clDate('- ' + dateWeekday)} ${clHighlightRed(
+            '(' + dateStringUI + ')'
+          )}: ${clHighlight(entries + ' entries,')} ${clDuration(
+            '[' + getDurationLangString(duration, humanize) + ']'
           )}`
         )
       })

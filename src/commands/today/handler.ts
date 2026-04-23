@@ -14,11 +14,15 @@ const handler = (args: TodayCommandArgs): void => {
     process.exit(0)
   }
 
-  const sheets = all
-    ? db.getAllSheets()
-    : _isUndefined(inputSheets)
-      ? [db.getActiveSheet()]
-      : inputSheets.map((name: string) => db.getSheet(name))
+  let sheets = db.getAllSheets()
+
+  if (!all) {
+    if (_isUndefined(inputSheets)) {
+      sheets = [db.getActiveSheet()]
+    } else {
+      sheets = inputSheets.map((name: string) => db.getSheet(name))
+    }
+  }
 
   const sheetsWithEntriesForToday = getSheetsWithEntriesSinceDate(
     sheets,

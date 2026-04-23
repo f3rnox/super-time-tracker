@@ -1,6 +1,5 @@
 import parseDate from 'time-speak'
 import _isEmpty from 'lodash/isEmpty'
-import _isArray from 'lodash/isArray'
 import _isFinite from 'lodash/isFinite'
 import formatDuration from 'format-duration'
 import _isUndefined from 'lodash/isUndefined'
@@ -17,10 +16,13 @@ const handler = async (args: OutCommandArgs): Promise<void> => {
     process.exit(0)
   }
 
-  const endDate =
-    _isUndefined(at) || _isEmpty(at)
-      ? new Date()
-      : new Date(+parseDate(_isArray(at) ? at.join(' ') : at))
+  let endDate: Date
+  if (_isUndefined(at) || _isEmpty(at)) {
+    endDate = new Date()
+  } else {
+    const atString: string = Array.isArray(at) ? at.join(' ') : String(at)
+    endDate = new Date(+parseDate(atString))
+  }
 
   const sheet = db.getActiveSheet()
   const { activeEntryID, name: sheetName } = sheet

@@ -1,14 +1,15 @@
-import parseDate from 'time-speak'
 import _isNil from 'lodash/isNil'
 import _isEmpty from 'lodash/isEmpty'
 import _isFinite from 'lodash/isFinite'
-import _isUndefined from 'lodash/isUndefined'
 
-import log from '../../log'
 import { parseVariadicArg } from '../../utils'
 import { type EditCommandArgs } from './types'
-import { clDate, clHighlight, clSheet, clText } from '../../color'
+import applyTargetEntryEdits from './apply_target_entry_edits'
+import handleNoTargetEntry from './handle_no_target_entry'
 
+/**
+ * Handles the edit command: update or delete time sheet entries or whole sheets.
+ */
 const handler = async (args: EditCommandArgs): Promise<void> => {
   const {
     db,
@@ -29,7 +30,7 @@ const handler = async (args: EditCommandArgs): Promise<void> => {
   }
 
   const activeSheetName = db.getActiveSheetName()
-  const description = parseVariadicArg(inputDescription)
+  const description = parseVariadicArg(inputDescription) ?? ''
   const finalSheetName = _isEmpty(inputSheet) ? activeSheetName : inputSheet
 
   if (_isNil(finalSheetName) || _isEmpty(finalSheetName)) {
@@ -41,73 +42,29 @@ const handler = async (args: EditCommandArgs): Promise<void> => {
   const finalEntryID =
     _isNil(inputEntry) || !_isFinite(+inputEntry) ? activeEntryID : +inputEntry
 
-  if (finalEntryID !== null && _isFinite(finalEntryID)) {
-    const entry = db.getSheetEntry(finalSheetName, finalEntryID)
+  const hasTargetEntry = finalEntryID !== null && _isFinite(finalEntryID)
 
-    if (del) {
-      await db.removeSheetEntry(sheet, entry)
-
-      if (activeEntryID === entry.id) {
-        sheet.activeEntryID = null
-
-        await db.save()
-      }
-
-      log(
-        `${clText('Deleted entry')} ${clHighlight(
-          `${finalEntryID}`
-        )} ${clText('from sheet')} ${clSheet(finalSheetName)}`
-      )
-    } else if (!_isUndefined(description) && !_isEmpty(description)) {
-      entry.description = description
-
-      await db.save()
-
-      log(
-        `${clText('Updated entry')} ${clHighlight(
-          `${finalEntryID}`
-        )} ${clText('in sheet')} ${clSheet(finalSheetName)}: ${clText(
-          description
-        )}`
-      )
-    } else if (!_isUndefined(start) && !_isEmpty(start)) {
-      const startDate = new Date(+parseDate(start))
-      entry.start = startDate
-
-      await db.save()
-
-      log(
-        `${clText('Updated entry')} ${clHighlight(
-          `${finalEntryID}`
-        )} ${clText('start date to')} ${clDate(startDate.toLocaleString())}`
-      )
-    } else if (!_isUndefined(end) && !_isEmpty(end)) {
-      const endDate = new Date(+parseDate(end))
-      entry.end = endDate
-
-      await db.save()
-
-      log(
-        `${clText('Updated entry')} ${clHighlight(
-          `${finalEntryID}`
-        )} ${clText('end date to')} ${clDate(endDate.toLocaleString())}`
-      )
-    }
-  } else if (del) {
-    await db.removeSheet(finalSheetName)
-
-    log(`${clText('Deleted sheet')} ${clSheet(finalSheetName)}`)
-  } else if (!_isUndefined(inputName) && !_isEmpty(inputName)) {
-    await db.renameSheet(sheet.name, inputName)
-
-    log(
-      `${clText('Renamed sheet')} ${clSheet(finalSheetName)} ${clText(
-        'to'
-      )} ${clHighlight(inputName)}`
-    )
-  } else {
-    throw new Error(`No new name specified for sheet ${finalSheetName}`)
+  if (!hasTargetEntry) {
+    await handleNoTargetEntry({
+      db,
+      finalSheetName,
+      sheet,
+      ...(del === undefined ? {} : { del }),
+      ...(inputName === undefined ? {} : { inputName })
+    })
+    return
   }
+  await applyTargetEntryEdits({
+    activeEntryID,
+    db,
+    description,
+    finalEntryID,
+    finalSheetName,
+    sheet,
+    ...(del === undefined ? {} : { del }),
+    ...(end === undefined ? {} : { end }),
+    ...(start === undefined ? {} : { start })
+  })
 }
 
 export default handler

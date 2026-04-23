@@ -28,6 +28,66 @@ import {
   getSheetsWithEntriesSinceDate
 } from '../../utils'
 
+/**
+ * Merges one time sheet entry into per-day, per-hour, and per-weekday breakdown maps.
+ */
+const accumulateEntryResults = (
+  sheet: TimeSheet,
+  entry: TimeSheetEntry,
+  resultsPerDay: BreakdownResults,
+  resultsPerHour: BreakdownResults,
+  resultsPerWeekday: BreakdownResults
+): void => {
+  const { end, start } = entry
+  const interval = {
+    end: _isUndefined(end) ? new Date() : (end as Date),
+    start
+  }
+
+  const days = eachDayOfInterval(interval)
+  const hours = eachHourOfInterval(interval).map((date: Date): number =>
+    date.getHours()
+  )
+
+  for (const date of days) {
+    for (const hour of hours) {
+      const hourStr = getHourString(hour)
+      const duration = getEntryDurationInHour(entry, date, hour)
+
+      populateResults({
+        date,
+        duration,
+        entry,
+        key: hourStr,
+        results: resultsPerHour,
+        sheet
+      })
+    }
+
+    const dateKey = date.toLocaleDateString()
+    const dateWeekday = weekday(date.getDay() + 1)
+    const duration = getEntryDurationInDay(entry, date)
+
+    populateResults({
+      date,
+      duration,
+      entry,
+      key: dateWeekday,
+      results: resultsPerWeekday,
+      sheet
+    })
+
+    populateResults({
+      date,
+      duration,
+      entry,
+      key: dateKey,
+      results: resultsPerDay,
+      sheet
+    })
+  }
+}
+
 const handler = (args: BreakdownCommandArgs): void => {
   const {
     db,
@@ -45,12 +105,14 @@ const handler = (args: BreakdownCommandArgs): void => {
     process.exit(0)
   }
 
-  // prettier-ignore
-  const targetSheets = all
-    ? db.getAllSheets()
-    : _isUndefined(inputSheets)
-      ? [db.getActiveSheet()]
-      : inputSheets.map((sheet: string) => db.getSheet(sheet))
+  let targetSheets: TimeSheet[]
+  if (all) {
+    targetSheets = db.getAllSheets()
+  } else if (_isUndefined(inputSheets)) {
+    targetSheets = [db.getActiveSheet()]
+  } else {
+    targetSheets = inputSheets.map((sheet: string) => db.getSheet(sheet))
+  }
 
   const sheetNames = _map(targetSheets, 'name')
   const since = _isUndefined(inputSince)
@@ -62,60 +124,17 @@ const handler = (args: BreakdownCommandArgs): void => {
   const resultsPerWeekday: BreakdownResults = {}
   const filteredSheets = getSheetsWithEntriesSinceDate(targetSheets, since)
 
-  filteredSheets.forEach((sheet: TimeSheet): void => {
-    const { entries } = sheet
-
-    entries.forEach((entry: TimeSheetEntry): void => {
-      const { end, start } = entry
-      const interval = {
-        end: end === null ? new Date() : end,
-        start
-      }
-
-      const days = eachDayOfInterval(interval)
-      const hours = eachHourOfInterval(interval).map((date: Date): number =>
-        date.getHours()
+  for (const sheet of filteredSheets) {
+    for (const entry of sheet.entries) {
+      accumulateEntryResults(
+        sheet,
+        entry,
+        resultsPerDay,
+        resultsPerHour,
+        resultsPerWeekday
       )
-
-      days.forEach((date: Date): void => {
-        hours.forEach((hour: number): void => {
-          const hourStr = getHourString(hour)
-          const duration = getEntryDurationInHour(entry, date, hour)
-
-          populateResults({
-            date,
-            duration,
-            entry,
-            key: hourStr,
-            results: resultsPerHour,
-            sheet
-          })
-        })
-
-        const dateKey = date.toLocaleDateString()
-        const dateWeekday = weekday(date.getDay() + 1)
-        const duration = getEntryDurationInDay(entry, date)
-
-        populateResults({
-          date,
-          duration,
-          entry,
-          key: dateWeekday,
-          results: resultsPerWeekday,
-          sheet
-        })
-
-        populateResults({
-          date,
-          duration,
-          entry,
-          key: dateKey,
-          results: resultsPerDay,
-          sheet
-        })
-      })
-    })
-  })
+    }
+  }
 
   const dayResults = Object.values(resultsPerDay)
   const hourResults = Object.keys(resultsPerHour)

@@ -2,7 +2,7 @@
 
 import _isEmpty from 'lodash/isEmpty'
 import _isUndefined from 'lodash/isUndefined'
-import yArgs, { type CommandModule } from 'yargs'
+import { type Argv, type CommandModule } from 'yargs'
 import updateNotifier from 'simple-update-notifier'
 
 import DB from './db'
@@ -17,40 +17,62 @@ updateNotifier({ pkg })
 const { DEBUG, NODE_ENV } = process.env
 const PRINT_TRACES = DEBUG || !_isEmpty(DEBUG) || NODE_ENV === 'development'
 
-const y = yArgs
-  .scriptName('track-time-cli')
-  .middleware(async (argv) => {
-    const db = new DB()
+type YargsFactory = (args?: readonly string[]) => Argv
 
-    await db.load()
+/**
+ * Loads yargs in both CommonJS and ESM runtimes.
+ */
+const loadYargsFactory = async (): Promise<YargsFactory> => {
+  const yargsModule = (await import('yargs')) as { default?: YargsFactory }
 
-    argv.db = db
-    argv.yargs = y
+  if (!_isUndefined(yargsModule.default)) {
+    return yargsModule.default
+  }
+
+  throw new Error('Failed to load yargs default export')
+}
+
+/**
+ * Bootstraps and executes the CLI command parser.
+ */
+const runCli = async (): Promise<void> => {
+  const yargsFactory = await loadYargsFactory()
+  const y = yargsFactory(process.argv.slice(2))
+    .scriptName('super-time')
+    .middleware(async (argv) => {
+      const db = new DB()
+
+      await db.load()
+
+      argv.db = db
+      argv.yargs = y
+    })
+    .fail((_, error: Error): void => {
+      if (!_isUndefined(error)) {
+        const errMessage = PRINT_TRACES ? error.stack : error.message
+
+        log(`${C.clHighlight('Error:')} ${errMessage}`)
+      }
+
+      process.exit(1)
+    })
+    .help(false)
+    .version()
+    .recommendCommands()
+    .example(
+      'tt in --at "20 minutes ago" fixing a bug',
+      'Check in at a custom time'
+    )
+    .example('tt out --at "5 minutes ago"', 'Check out at a custom time')
+    .example('tt list --today --all', 'View all entries from today')
+    .example('tt b', 'Show a breakdown of your activity')
+    .example('tt today --all', 'View activity for the current day')
+
+  commands.forEach((def) => {
+    y.command(def as unknown as CommandModule)
   })
-  .fail((_, error: Error): void => {
-    if (!_isUndefined(error)) {
-      const errMessage = PRINT_TRACES ? error.stack : error.message
 
-      log(`${C.clHighlight('Error:')} ${errMessage}`)
-    }
+  await y.parse()
+}
 
-    process.exit(1)
-  })
-  .help(false)
-  .version()
-  .recommendCommands()
-  .example(
-    'tt in --at "20 minutes ago" fixing a bug',
-    'Check in at a custom time'
-  )
-  .example('tt out --at "5 minutes ago"', 'Check out at a custom time')
-  .example('tt list --today --all', 'View all entries from today')
-  .example('tt b', 'Show a breakdown of your activity')
-  .example('tt today --all', 'View activity for the current day')
-
-commands.forEach((def) => {
-  y.command(def as unknown as CommandModule)
-})
-
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-y.parse()
+runCli()

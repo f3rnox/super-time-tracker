@@ -1,8 +1,8 @@
 import handler from './handler'
 import { CONFIG } from './const'
-import { type ListCommandArgs } from './types'
 
-export { type ListCommandArgs, handler }
+export { type ListCommandArgs } from './types'
+export { handler }
 export default {
   ...CONFIG,
   handler

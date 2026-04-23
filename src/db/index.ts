@@ -1,7 +1,7 @@
-import path from 'path'
+import path from 'node:path'
 import _max from 'lodash/max'
 import _isDate from 'lodash/isDate'
-import { promises as fs } from 'fs'
+import { promises as fs } from 'node:fs'
 import _isEmpty from 'lodash/isEmpty'
 import _isNumber from 'lodash/isNumber'
 import _isString from 'lodash/isString'
@@ -125,10 +125,7 @@ class DB {
     await U.ensureDirExists(dbPathDir)
     const dbExists = await this.doesDBExist()
 
-    if (!dbExists) {
-      this.db = DB.genDB()
-      await this.save()
-    } else {
+    if (dbExists) {
       const dbJSON = await fs.readFile(this.dbPath, 'utf-8')
       let jsonDB: JSONTimeTrackerDB
 
@@ -159,6 +156,9 @@ class DB {
       if (didMigrate) {
         await this.save()
       }
+    } else {
+      this.db = DB.genDB()
+      await this.save()
     }
   }
 

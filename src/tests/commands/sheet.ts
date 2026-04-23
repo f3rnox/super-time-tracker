@@ -1,12 +1,8 @@
 import { type Argv } from 'yargs'
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
 
 import DB from '../../db'
 import getTestDB from '../get_test_db'
 import { type SheetCommandArgs, handler } from '../../commands/sheet'
-
-chai.use(chaiAsPromised)
 
 const db = getTestDB()
 const getArgs = (overrides?: Record<string, unknown>): SheetCommandArgs => ({
@@ -15,25 +11,23 @@ const getArgs = (overrides?: Record<string, unknown>): SheetCommandArgs => ({
   ...(overrides ?? {})
 })
 
-describe('commands:sheet:handler', function () {
-  this.timeout(10 * 1000)
-
-  beforeEach(async function () {
+describe('commands:sheet:handler', () => {
+  beforeEach(async () => {
     await db.load()
   })
 
-  afterEach(async function () {
+  afterEach(async () => {
     await db.delete()
   })
 
-  it('throws an error if trying to delete a sheet that does not exist', async function () {
+  it('throws an error if trying to delete a sheet that does not exist', async () => {
     const sheetName = 'non-existent-sheet'
     const p = handler(getArgs({ delete: true, name: sheetName }))
 
-    await expect(p).to.be.rejectedWith(`Sheet ${sheetName} not found`)
-  })
+    await expect(p).rejects.toThrow(`Sheet ${sheetName} not found`)
+  }, 10000)
 
-  it('removes specified sheet from the DB if it exists', async function () {
+  it('removes specified sheet from the DB if it exists', async () => {
     const sheetNameA = 'test-sheet-a'
     const sheetNameB = 'test-sheet-b'
     const sheetA = DB.genSheet(sheetNameA)
@@ -44,12 +38,13 @@ describe('commands:sheet:handler', function () {
 
     await handler(getArgs({ delete: true, name: sheetNameA }))
 
-    expect(db.db?.sheets.length).to.equal(2)
-    expect(db.db?.sheets.find(({ name }) => name === sheetNameA)).to.be
-      .undefined
-  })
+    expect(db.db?.sheets.length).toBe(2)
+    expect(
+      db.db?.sheets.find(({ name }) => name === sheetNameA)
+    ).toBeUndefined()
+  }, 10000)
 
-  it('throws an error if no name is given', async function () {
+  it('throws an error if no name is given', async () => {
     if (db.db === null) {
       throw new Error('Test DB is null')
     }
@@ -58,16 +53,16 @@ describe('commands:sheet:handler', function () {
 
     const p = handler(getArgs({ delete: false, name: '' }))
 
-    await expect(p).to.be.rejectedWith('New sheet name must not be empty')
-  })
+    await expect(p).rejects.toThrow('New sheet name must not be empty')
+  }, 10000)
 
-  it('throws an error if the specified sheet is already active', async function () {
+  it('throws an error if the specified sheet is already active', async () => {
     const p = handler(getArgs({ delete: false, name: 'main' }))
 
-    await expect(p).to.be.rejectedWith('Sheet main already active')
-  })
+    await expect(p).rejects.toThrow('Sheet main already active')
+  }, 10000)
 
-  it('switches to the specified sheet', async function () {
+  it('switches to the specified sheet', async () => {
     const sheetNameA = 'test-sheet-a'
     const sheetNameB = 'test-sheet-b'
     const sheetA = DB.genSheet(sheetNameA)
@@ -78,10 +73,10 @@ describe('commands:sheet:handler', function () {
 
     await handler(getArgs({ delete: false, name: sheetNameA }))
 
-    expect(db.getActiveSheetName()).to.equal(sheetNameA)
-  })
+    expect(db.getActiveSheetName()).toBe(sheetNameA)
+  }, 10000)
 
-  it('creates a new sheet with the name if it does not exist', async function () {
+  it('creates a new sheet with the name if it does not exist', async () => {
     const sheetNameA = 'test-sheet-a'
     const sheetNameB = 'test-sheet-b'
     const sheetNameC = 'test-sheet-c'
@@ -96,9 +91,9 @@ describe('commands:sheet:handler', function () {
     const sheets = db.getAllSheets()
     const newSheet = sheets.find(({ name }) => name === sheetNameC)
 
-    expect(db.getActiveSheetName()).to.equal(sheetNameC)
-    expect(newSheet?.name).to.equal(sheetNameC)
-    expect(newSheet?.activeEntryID).to.be.null
-    expect(newSheet?.entries).to.be.empty
-  })
+    expect(db.getActiveSheetName()).toBe(sheetNameC)
+    expect(newSheet?.name).toBe(sheetNameC)
+    expect(newSheet?.activeEntryID).toBeNull()
+    expect(newSheet?.entries).toHaveLength(0)
+  }, 10000)
 })
