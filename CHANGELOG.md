@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.52.2](https://github.com/f3rnox/super-time/compare/v1.52.1...v1.52.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* readme config folder path ([5be04be](https://github.com/f3rnox/super-time/commit/5be04be5521b3402a8a54216eac149b1c375996b))
+
 ### [1.52.1](https://github.com/f3rnox/super-time/compare/v1.52.0...v1.52.1) (2026-04-23)
 
 
