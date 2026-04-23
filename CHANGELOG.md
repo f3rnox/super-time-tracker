@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.49.4](https://github.com/f3rnox/super-time/compare/v1.49.3...v1.49.4) (2026-04-23)
+
+
+### Bug Fixes
+
+* rename tt to stt in help output ([e552d71](https://github.com/f3rnox/super-time/commit/e552d71875bb176b2ab601b21f3ed62f5f567a0e))
+
 ### [1.49.3](https://github.com/f3rnox/super-time/compare/v1.49.2...v1.49.3) (2026-04-23)
 
 
