@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.52.0](https://github.com/f3rnox/super-time/compare/v1.51.1...v1.52.0) (2026-04-23)
+
+
+### Features
+
+* expand commands with cursor ([76991c6](https://github.com/f3rnox/super-time/commit/76991c60a89376e2327fe1f6047676ba390f4d60))
+
 ### [1.51.1](https://github.com/f3rnox/super-time/compare/v1.51.0...v1.51.1) (2026-04-23)
 
 
