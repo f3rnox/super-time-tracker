@@ -19,18 +19,54 @@ import {
   type TimeSheetEntry,
   type JSONTimeTrackerDB
 } from '../types'
+import { type AddActiveSheetEntryArgs } from './types'
 
 const { DB_VERSION } = CONFIG
 const { NODE_ENV } = process.env
 const DEFAULT_DB_PATH = NODE_ENV === 'test' ? TEST_DB_PATH : DB_PATH
+const MIGRATIONS_BY_TARGET_VERSION: Record<
+  number,
+  (jsonDB: JSONTimeTrackerDB) => JSONTimeTrackerDB
+> = {
+  2: migrateJSONDBToVersionTwo
+}
 
-// TODO: Extract
-interface AddActiveSheetEntryArgs {
-  sheet: TimeSheet | string
-  input?: string
-  description?: string
-  startDate?: Date
-  tags?: string[]
+interface MigrateJSONDBResult {
+  didMigrate: boolean
+  jsonDB: JSONTimeTrackerDB
+}
+
+const migrateJSONDB = (jsonDBInput: JSONTimeTrackerDB): MigrateJSONDBResult => {
+  let jsonDB = jsonDBInput
+  let didMigrate = false
+  let currentVersion = _isUndefined(jsonDB.version) ? 1 : jsonDB.version
+
+  if (currentVersion > DB_VERSION || currentVersion < 1) {
+    throw new Error(`Unknown DB version ${jsonDB.version}, cannot load.`)
+  }
+
+  while (currentVersion < DB_VERSION) {
+    const targetVersion = currentVersion + 1
+    const migration = MIGRATIONS_BY_TARGET_VERSION[targetVersion]
+
+    if (_isUndefined(migration)) {
+      throw new Error(
+        `Missing migration from version ${currentVersion} to ${targetVersion}.`
+      )
+    }
+
+    jsonDB = migration(jsonDB)
+
+    if (jsonDB.version !== targetVersion) {
+      throw new Error(`Invalid migration output for version ${targetVersion}.`)
+    }
+
+    currentVersion = targetVersion
+    didMigrate = true
+    log(`Migrated DB to version ${targetVersion}`)
+  }
+
+  return { jsonDB, didMigrate }
 }
 
 class DB {
@@ -138,18 +174,9 @@ class DB {
         )
       }
 
-      let didMigrate = false
-
-      // TODO: Handle an arbitrary number of migrations between multiple
-      //       versions.
-      if (jsonDB.version === 1 || _isUndefined(jsonDB.version)) {
-        jsonDB = migrateJSONDBToVersionTwo(jsonDB)
-        didMigrate = true
-
-        log('Migrated DB to version 2')
-      } else if (jsonDB.version > DB_VERSION || jsonDB.version < 1) {
-        throw new Error(`Unknown DB version ${jsonDB.version}, cannot load.`)
-      }
+      const migrationResult = migrateJSONDB(jsonDB)
+      const { didMigrate } = migrationResult
+      jsonDB = migrationResult.jsonDB
 
       this.db = convertJSONDB(jsonDB)
 

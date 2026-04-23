@@ -29,7 +29,6 @@ const handler = async (args: InCommandArgs): Promise<void> => {
     throw new Error(`An entry is already active (${id}): ${entryDescription}`)
   }
 
-  // TODO: Rename description to input or content (or think of a better name)
   const { at, description: inputArray } = args
   const input = inputArray.join(' ')
   const startDate =
