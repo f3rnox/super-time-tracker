@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.51.1](https://github.com/f3rnox/super-time/compare/v1.51.0...v1.51.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* prevent long-entry hangs and add regression coverage ([a15262a](https://github.com/f3rnox/super-time/commit/a15262a5017635603d92d4774100f1541caf2ba4))
+* yesterday command showing entries from today ([c44a232](https://github.com/f3rnox/super-time/commit/c44a23284d912b5b8f5747c9f944dd10a71112f0))
+
 ## [1.51.0](https://github.com/f3rnox/super-time/compare/v1.50.0...v1.51.0) (2026-04-23)
 
 
