@@ -2,6 +2,78 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.48.0 (2026-04-23)
+
+
+### Features
+
+* add db migrations, db version 2 with entry tags ([8885122](https://github.com/f3rnox/super-time/commit/88851225aa664d92385a540f17c5a06c90976a0d))
+* add docs submodule and built docs folder ([9234930](https://github.com/f3rnox/super-time/commit/923493011a9cc59bfb338dbea16d9e3445b10568))
+* add many new eslint plugins, fix all resulting errors ([9b912da](https://github.com/f3rnox/super-time/commit/9b912da985bb66f868975eac69ee2a6e2eee1a12))
+* add markdownlint, stylelint, lint-staged, fix style lint errors ([e5c5e64](https://github.com/f3rnox/super-time/commit/e5c5e647dab150028d3d7bce8e10e8cb338a8be7))
+* add prettier and format scripts, use in GH workflows and pre-commit ([0920a47](https://github.com/f3rnox/super-time/commit/0920a4727be51d48655fedc723dfb3e5024ae086))
+* add week report header to week command stating since date ([a855345](https://github.com/f3rnox/super-time/commit/a855345b0970d1c1e2ce1c145cba9ac3e79b68e8))
+* **commitlint:** add commitlint and config, husky hook ([c94b786](https://github.com/f3rnox/super-time/commit/c94b7863ffccfb4861825ae3e6d7fb203cac6345))
+* early tags support, prefixed with @; integrated with a few commands ([34a8c1e](https://github.com/f3rnox/super-time/commit/34a8c1e66c8f0d6333aaa675327f73af12aaebbb))
+* **README:** improve readme, add info on commands and more ([adf162e](https://github.com/f3rnox/super-time/commit/adf162e2144ba2c2f5d4a4b391e601c8d6cf534c))
+* **sheets:** list last five active sheets in output ([c5f9f94](https://github.com/f3rnox/super-time/commit/c5f9f944efcb2851f6983c9542390755cbbda79f))
+* update deps, rename to super-time ([01ef851](https://github.com/f3rnox/super-time/commit/01ef8517221843663e6cab6e444c0fa6b6830fbe))
+
+
+### Bug Fixes
+
+* --help handling in all commands ([12c5230](https://github.com/f3rnox/super-time/commit/12c5230c1d8e374b735800ea31c34816bf10c414))
+* --help with no command, provide yargs instance to handler args ([6f9d9a0](https://github.com/f3rnox/super-time/commit/6f9d9a02ff359f2a1f95e37fcdde71145384241a))
+* add --no-git-checks flag to pnpm publish in GH publish workflow ([3d614ac](https://github.com/f3rnox/super-time/commit/3d614acf8480e53a4dca3c4df9348a5f82332bf9))
+* add .github to npmignore ([15fbc4a](https://github.com/f3rnox/super-time/commit/15fbc4a8bb0ce87b72e9a42e4f9071fc6004fc6d))
+* add dist/tests to npmignore ([03ec533](https://github.com/f3rnox/super-time/commit/03ec5330f7eea9ae6bb3489baaabb94911b9d408))
+* add docs and docs_build to prettier and eslint ignores ([c37cb95](https://github.com/f3rnox/super-time/commit/c37cb95e9a85d8ffd061eece08e1b32edb831f54))
+* add missing handlebars dep, closes [#1](https://github.com/f3rnox/super-time/issues/1) ([7313cd6](https://github.com/f3rnox/super-time/commit/7313cd6ee80f4da046c743535915bb28530ad020))
+* add todo to npmignore ([8ce6f91](https://github.com/f3rnox/super-time/commit/8ce6f9131f43dfb4d2de3543c7ff343c5ffffa7d))
+* adjust command arg types to indicate optional args ([5c4b0ba](https://github.com/f3rnox/super-time/commit/5c4b0ba8f891ef4715a29df1b744e2fce8be1203))
+* alias all-sheets arg as all for breakdown command ([4ddb383](https://github.com/f3rnox/super-time/commit/4ddb383be7325aa6d2ebb9dd9c3d4e7662245922))
+* allow check-out without specifying time ([7f986e9](https://github.com/f3rnox/super-time/commit/7f986e9d71880d33cd0547a555e5858de02a3334))
+* check if at arg is array in out handler ([b464a97](https://github.com/f3rnox/super-time/commit/b464a97fd7034cc3dc9b22b603563c6f03406c94))
+* disable husky in GH workflows ([a295153](https://github.com/f3rnox/super-time/commit/a29515315e9dbb4ba48afbcde25b11749e4b1dfb))
+* edit command tests ([68946dd](https://github.com/f3rnox/super-time/commit/68946ddf9646fe06af1e1f4b48630abb36e5a25a))
+* get_duration_in_hour test start/end timestamps were reversed ([72cd8b4](https://github.com/f3rnox/super-time/commit/72cd8b4b8784b235732172bea58d51a8dd8131d4))
+* getStartDate and getEndDate ([beaa7be](https://github.com/f3rnox/super-time/commit/beaa7be39394a934afc6506abe0182feb0b275b8))
+* github package publish workflow ([37b37bc](https://github.com/f3rnox/super-time/commit/37b37bca8f0dfc55728757f5e8d00f7bc06f2695))
+* handle fail handler call with undefined error ([652b49b](https://github.com/f3rnox/super-time/commit/652b49bec10d58f8feb4b12922ce899b3d9e030f))
+* **in:** alter description arg requirement to fix --help ([8e37978](https://github.com/f3rnox/super-time/commit/8e37978a8f6499d2870b1157da4df07fb6e1b589))
+* increase command test timeouts ([f630669](https://github.com/f3rnox/super-time/commit/f63066955d3700e3fd8016308621fe92d361c270))
+* **lint:** lint only README.md, not auto-generated CHANGELOG.md ([46156f0](https://github.com/f3rnox/super-time/commit/46156f0d17ee8041de109d640a631c042cfe16d3))
+* manifest bin value ([5c6b5d2](https://github.com/f3rnox/super-time/commit/5c6b5d2885498187317ebd47baaa7d5ec0005377))
+* minor output polish ([aae357d](https://github.com/f3rnox/super-time/commit/aae357d582e416c34a3b560b24842a9908f4ac14))
+* move install pnpm step up in workflows ([fbade49](https://github.com/f3rnox/super-time/commit/fbade490d8e9445f58b20770a2ca748293ef463c))
+* new linter errors raised by eslint-plugin-mocha ([dd9bc7c](https://github.com/f3rnox/super-time/commit/dd9bc7cf58e3b784d719ec3056fcde9b54a586db))
+* npm_publish workflow missing build in publish job ([e05a46e](https://github.com/f3rnox/super-time/commit/e05a46e4df1846d86d963e508bae4f0f50d16e90))
+* NPM_TOKEN secret case in publish GH workflow ([5c9edae](https://github.com/f3rnox/super-time/commit/5c9edae3e396c213a081f0782af871f6bbcdaa18))
+* npmignore ([b7866b3](https://github.com/f3rnox/super-time/commit/b7866b307ace04fcda8650120984f5c9053f4ccf))
+* **prettier:** add CHANGELOG.md to prettierignore ([3864aed](https://github.com/f3rnox/super-time/commit/3864aed17cdab28622512def1c12a90378fe0e40))
+* proper husky config ([9c8e0ba](https://github.com/f3rnox/super-time/commit/9c8e0ba0c4bf560bc0afd60bd3c67c826da84ca0))
+* rename absolute alias to abs to not clobber all option ([d8b7c2e](https://github.com/f3rnox/super-time/commit/d8b7c2ee2f6c210c1edca7c15279c653b2a7bd36))
+* require min node v16 in CI workflow ([44c4866](https://github.com/f3rnox/super-time/commit/44c4866b0c7d23d8bd856aeca969e29c56dd805a))
+* resume active sheet in resume command ([a804cf6](https://github.com/f3rnox/super-time/commit/a804cf688399d282851eb516f9e674dcb86c3411))
+* rm docs cmd from script (was copied from a personal template project) ([881cd3f](https://github.com/f3rnox/super-time/commit/881cd3f82bdce17e59df39e9df6569181fc67488))
+* rm test for now command, error is no longer thrown ([2b76c3e](https://github.com/f3rnox/super-time/commit/2b76c3ec603b0b572dcede12f8384b7f523693e3))
+* rm vestigial -c flag from updates cmd ([aafd509](https://github.com/f3rnox/super-time/commit/aafd509d97ce304af68f648232dd1b302cbd0b4e))
+* rm vestigial .yarnrc.yml ([413dd2d](https://github.com/f3rnox/super-time/commit/413dd2dc3f75943f2d4620c680cb02fa59737b8b))
+* rm vestigial dep from publish GH workflow job ([063c4a7](https://github.com/f3rnox/super-time/commit/063c4a7c14d360b2a48316df799a049956d75e77))
+* rm workflow node version test for 14.x ([6f1abf5](https://github.com/f3rnox/super-time/commit/6f1abf5ef76168f8b46fa29b8fe9f3328cdab325))
+* run pnpm format ([1de38d1](https://github.com/f3rnox/super-time/commit/1de38d159d040ef2e4eaa827aa69993cebec30e8))
+* sheet command ([e7beb54](https://github.com/f3rnox/super-time/commit/e7beb545e8d0e140b1059974aec04acf84a17fbf))
+* sheet command delete logic ([6351e65](https://github.com/f3rnox/super-time/commit/6351e65b627f84ad29620510bbd17543603f9004))
+* skip color tests if in CI, closes [#2](https://github.com/f3rnox/super-time/issues/2) ([8fadb6d](https://github.com/f3rnox/super-time/commit/8fadb6defdc9c344df67a7443bd71cd1657973da))
+* test ([9384ba2](https://github.com/f3rnox/super-time/commit/9384ba210b412601bf072b06bde78c9d789ddd25))
+* test failing with node 20.x ([6e5678d](https://github.com/f3rnox/super-time/commit/6e5678dba86627fdfe10036fdc02f939d7664ec8))
+* today command ([39579fb](https://github.com/f3rnox/super-time/commit/39579fb33a5fa6eeca0481015b33d8db34d5ebec))
+* update edit handler to reset activeEntryID if the entry is deleted ([bf99e56](https://github.com/f3rnox/super-time/commit/bf99e563a27202f009ab87c887d75c3dc6736817))
+* update README.md GH test workflow badge link and alt text ([1ee1379](https://github.com/f3rnox/super-time/commit/1ee1379e9b4f80de4d016122ef38fab312e86882))
+* update storage path to match new name, use it in cli script name ([173648f](https://github.com/f3rnox/super-time/commit/173648f4009f8163a68b927f863e3f924852fbf2))
+* use static node version in GH CI workflow job step name ([fc242bd](https://github.com/f3rnox/super-time/commit/fc242bdc474b53a5db0b98d4f2bd7178079701ed))
+* week command start date ([371197e](https://github.com/f3rnox/super-time/commit/371197e6d64db22f402ecaf6b2077be75acab92b))
+
 ## 1.47.0 (2026-04-23)
 
 
