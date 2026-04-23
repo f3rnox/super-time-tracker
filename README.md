@@ -11,7 +11,7 @@ utility for tracking tasks in time sheets, inspired by ruby's
 It supports natural language specification of entry start and end times,
 allowing you to check out of entries retroactively, or check in after already
 starting a task without leaving any time untracked. The database is a JSON file
-stored in your home folder, at `~/.super-time/db.json`.
+stored in your home folder, at `~/.super-time-tracker/db.json`.
 
 ## Example Usage
 
