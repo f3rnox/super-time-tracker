@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.53.1](https://github.com/f3rnox/super-time/compare/v1.53.0...v1.53.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* formatOption import path ([3c69b04](https://github.com/f3rnox/super-time/commit/3c69b0434741c490638a6ec87cb1182146d4f960))
+
 ## [1.53.0](https://github.com/f3rnox/super-time/compare/v1.52.2...v1.53.0) (2026-04-23)
 
 
