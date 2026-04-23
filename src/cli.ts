@@ -38,7 +38,7 @@ const loadYargsFactory = async (): Promise<YargsFactory> => {
 const runCli = async (): Promise<void> => {
   const yargsFactory = await loadYargsFactory()
   const y = yargsFactory(process.argv.slice(2))
-    .scriptName('super-time')
+    .scriptName('super-time-tracker')
     .middleware(async (argv) => {
       const db = new DB()
 
