@@ -2,8 +2,6 @@
 /.github
 /.husky
 /src
-/styles
-/templates
 /node_modules
 /dist/tests
 
