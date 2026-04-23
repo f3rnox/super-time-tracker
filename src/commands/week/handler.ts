@@ -43,6 +43,7 @@ const handler = (args: WeekCommandArgs): void => {
       : inputSheets.map((name: string): TimeSheet => db.getSheet(name))
 
   const lastWeekDate = new Date(Date.now() - getDaysMS(7))
+  const lastWeekThroughTodayDayCount = 8
   const relevantSheets = getSheetsWithEntriesInLastWeek(selectedSheets)
   const results: WeekdayResults = {}
 
@@ -53,7 +54,7 @@ const handler = (args: WeekCommandArgs): void => {
     const sheetResults: Record<string, WeekdayResult> = {}
 
     entries.forEach((entry: TimeSheetEntry) => {
-      for (let i = 0; i < 7; i += 1) {
+      for (let i = 0; i < lastWeekThroughTodayDayCount; i += 1) {
         const date = new Date(+lastWeekDate + i * getDaysMS(1))
         const dateKey = date.toLocaleDateString()
         const duration = getEntryDurationInDay(entry, date)
