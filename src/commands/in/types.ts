@@ -7,6 +7,8 @@ export interface InCommandArgs {
   at?: string
   yargs: Argv
   help?: boolean
+  note?: string
   sheet?: string
+  tags?: string[]
   description: string[]
 }

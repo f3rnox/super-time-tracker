@@ -3,7 +3,10 @@ import {
   HelpOption,
   TodayOption,
   SinceOption,
-  HumanizeOption
+  FilterOption,
+  ConciseOption,
+  HumanizeOption,
+  YesterdayOption
 } from '../../options'
 
 export const CONFIG = {
@@ -14,6 +17,9 @@ export const CONFIG = {
     HumanizeOption,
     SinceOption,
     TodayOption,
+    YesterdayOption,
+    ConciseOption,
+    FilterOption,
     HelpOption
   ])
 }

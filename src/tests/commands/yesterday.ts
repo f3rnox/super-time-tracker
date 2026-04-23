@@ -77,4 +77,23 @@ describe('commands:yesterday:handler', () => {
 
     expect(() => handler(getArgs())).toThrow('No entries for yesterday')
   })
+
+  it('filters entries by --filter', () => {
+    const yesterday = getYesterday()
+    const startDate = new Date(+yesterday - 60 * 60 * 1000)
+    const endDate = new Date(+yesterday + 60 * 60 * 1000)
+    const matching = DB.genSheetEntry(0, 'pair programming', startDate, endDate)
+    const nonMatching = DB.genSheetEntry(1, 'admin', startDate, endDate)
+    const sheet = DB.genSheet('test-sheet', [matching, nonMatching])
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    expect(() => handler(getArgs({ filter: 'pair' }))).not.toThrow()
+    expect(() => handler(getArgs({ filter: 'missing' }))).toThrow(
+      'No entries for yesterday'
+    )
+  })
 })

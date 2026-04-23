@@ -11,8 +11,9 @@ import logListSheetsHeader from './log_list_sheets_header'
 
 const handler = (args: ListCommandArgs): void => {
   const {
-    db,
+    ago,
     all,
+    db,
     help,
     since,
     today,
@@ -54,7 +55,9 @@ const handler = (args: ListCommandArgs): void => {
 
   log('')
 
-  printSheets(filteredSheets, absolute !== true, humanize, concise)
+  const useRelativeDates = ago === true || absolute !== true
+
+  printSheets(filteredSheets, useRelativeDates, humanize, concise)
 
   logListSheetsAfterPrint({
     all,

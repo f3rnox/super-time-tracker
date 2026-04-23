@@ -7,5 +7,6 @@ export interface SheetCommandArgs {
   yargs: Argv
   name?: string
   help?: boolean
+  rename?: string
   delete?: boolean
 }

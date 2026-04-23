@@ -11,6 +11,7 @@ export interface EditCommandArgs {
   help?: boolean
   sheet?: string
   start?: string
+  tags?: string[]
   delete?: boolean
   description?: string
 }

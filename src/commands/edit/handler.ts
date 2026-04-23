@@ -15,6 +15,7 @@ const handler = async (args: EditCommandArgs): Promise<void> => {
     db,
     end,
     help,
+    tags,
     yargs,
     start,
     delete: del,
@@ -63,7 +64,8 @@ const handler = async (args: EditCommandArgs): Promise<void> => {
     sheet,
     ...(del === undefined ? {} : { del }),
     ...(end === undefined ? {} : { end }),
-    ...(start === undefined ? {} : { start })
+    ...(start === undefined ? {} : { start }),
+    ...(tags === undefined ? {} : { tags })
   })
 }
 

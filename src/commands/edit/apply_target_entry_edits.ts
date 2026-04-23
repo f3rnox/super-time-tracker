@@ -1,7 +1,9 @@
 import parseDate from 'time-speak'
+import _isEmpty from 'lodash/isEmpty'
+import _isUndefined from 'lodash/isUndefined'
 
 import log from '../../log'
-import { clDate, clHighlight, clSheet, clText } from '../../color'
+import { clDate, clHighlight, clSheet, clTag, clText } from '../../color'
 import type { TimeSheet } from '../../types'
 import type DB from '../../db'
 import hasStringValue from './has_string_value'
@@ -16,10 +18,12 @@ interface ApplyTargetEntryEditsArgs {
   finalSheetName: string
   sheet: TimeSheet
   start?: string
+  tags?: string[]
 }
 
 /**
- * Deletes or updates a sheet entry (description, start, or end) when a target entry id is known.
+ * Deletes or updates a sheet entry (description, start, end, or tags) when a
+ * target entry id is known.
  */
 const applyTargetEntryEdits = async (
   args: ApplyTargetEntryEditsArgs
@@ -33,7 +37,8 @@ const applyTargetEntryEdits = async (
     finalEntryID,
     finalSheetName,
     sheet,
-    start
+    start,
+    tags
   } = args
   const entry = db.getSheetEntry(finalSheetName, finalEntryID)
 
@@ -50,9 +55,12 @@ const applyTargetEntryEdits = async (
     )
     return
   }
+
+  let didUpdate = false
+
   if (hasStringValue(description)) {
     entry.description = description
-    await db.save()
+    didUpdate = true
     log(
       `${clText('Updated entry')} ${clHighlight(
         `${finalEntryID}`
@@ -60,28 +68,42 @@ const applyTargetEntryEdits = async (
         description
       )}`
     )
-    return
   }
+
   if (hasStringValue(start)) {
     const startDate = new Date(+parseDate(start))
     entry.start = startDate
-    await db.save()
+    didUpdate = true
     log(
       `${clText('Updated entry')} ${clHighlight(
         `${finalEntryID}`
       )} ${clText('start date to')} ${clDate(startDate.toLocaleString())}`
     )
-    return
   }
+
   if (hasStringValue(end)) {
     const endDate = new Date(+parseDate(end))
     entry.end = endDate
-    await db.save()
+    didUpdate = true
     log(
       `${clText('Updated entry')} ${clHighlight(
         `${finalEntryID}`
       )} ${clText('end date to')} ${clDate(endDate.toLocaleString())}`
     )
+  }
+
+  if (!_isUndefined(tags) && !_isEmpty(tags)) {
+    entry.tags = tags
+    didUpdate = true
+    log(
+      `${clText('Updated entry')} ${clHighlight(
+        `${finalEntryID}`
+      )} ${clText('tags to')} ${tags.map(clTag).join(' ')}`
+    )
+  }
+
+  if (didUpdate) {
+    await db.save()
   }
 }
 

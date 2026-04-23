@@ -1,7 +1,10 @@
 import {
   setup,
+  AgoOption,
   HelpOption,
+  FilterOption,
   SheetsOption,
+  ConciseOption,
   AbsoluteOption,
   HumanizeOption,
   AllSheetsOption
@@ -14,7 +17,10 @@ export const CONFIG = {
   builder: setup.bind(null, [
     SheetsOption,
     AbsoluteOption,
+    AgoOption,
     HumanizeOption,
+    ConciseOption,
+    FilterOption,
     AllSheetsOption,
     HelpOption
   ])

@@ -103,4 +103,86 @@ describe('commands:resume:handler', () => {
     expect(Math.abs(+newEntry.start - Date.now())).toBeLessThanOrEqual(1000)
     expect(newEntry.end).toBeNull()
   }, 10000)
+
+  it('resumes a specific entry selected by --entry', async () => {
+    const entryA = DB.genSheetEntry(
+      0,
+      'older',
+      new Date(Date.now() - 10000),
+      new Date(Date.now() - 9000)
+    )
+    const entryB = DB.genSheetEntry(
+      1,
+      'newer',
+      new Date(Date.now() - 5000),
+      new Date(Date.now() - 4000)
+    )
+    const sheet = DB.genSheet('test-sheet', [entryA, entryB])
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    await handler(getArgs({ entry: 0 }))
+
+    const newEntry = _last(sheet.entries) as unknown as TimeSheetEntry
+
+    expect(newEntry.description).toBe('older')
+  }, 10000)
+
+  it('resumes on a specific sheet selected by --sheet', async () => {
+    const activeSheet = DB.genSheet('active-sheet')
+    const targetEntry = DB.genSheetEntry(
+      0,
+      'target',
+      new Date(Date.now() - 60000),
+      new Date(Date.now() - 30000)
+    )
+    const targetSheet = DB.genSheet('target-sheet', [targetEntry])
+
+    if (db.db !== null) {
+      db.db.sheets.push(activeSheet, targetSheet)
+      db.db.activeSheetName = activeSheet.name
+    }
+
+    await handler(getArgs({ sheet: 'target-sheet' }))
+
+    const newEntry = _last(targetSheet.entries) as unknown as TimeSheetEntry
+
+    expect(targetSheet.activeEntryID).toBe(newEntry.id)
+    expect(newEntry.description).toBe('target')
+    expect(activeSheet.activeEntryID).toBeNull()
+  }, 10000)
+
+  it('overrides description, tags, and start time when provided', async () => {
+    const original = DB.genSheetEntry(
+      0,
+      'original',
+      new Date(Date.now() - 60000),
+      new Date(Date.now() - 30000)
+    )
+    const sheet = DB.genSheet('test-sheet', [original])
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    const atDate = new Date(Date.now() - 120000)
+
+    await handler(
+      getArgs({
+        at: atDate.toISOString(),
+        description: ['fresh', 'context'],
+        tags: ['@overridden']
+      })
+    )
+
+    const newEntry = _last(sheet.entries) as unknown as TimeSheetEntry
+
+    expect(newEntry.description).toBe('fresh context')
+    expect(newEntry.tags).toEqual(['@overridden'])
+    expect(+newEntry.start).toBe(+atDate)
+  }, 10000)
 })

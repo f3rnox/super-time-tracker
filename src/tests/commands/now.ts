@@ -88,4 +88,31 @@ describe('commands:now:handler', () => {
     expect(() => handler(getArgs())).not.toThrow()
     expect(entry.notes.map(({ text }) => text)).toEqual(originalOrder)
   })
+
+  it('throws when --all is given but no sheet has an active entry', () => {
+    const sheet = DB.genSheet('test-sheet')
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    expect(() => handler(getArgs({ all: true }))).toThrow(
+      'No sheet has an active entry'
+    )
+  })
+
+  it('prints active entries across all sheets when --all is given', () => {
+    const entryA = DB.genSheetEntry(0, 'work')
+    const sheetA = DB.genSheet('sheet-a', [entryA], entryA.id)
+    const entryB = DB.genSheetEntry(0, 'research')
+    const sheetB = DB.genSheet('sheet-b', [entryB], entryB.id)
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheetA, sheetB)
+      db.db.activeSheetName = sheetA.name
+    }
+
+    expect(() => handler(getArgs({ all: true }))).not.toThrow()
+  })
 })

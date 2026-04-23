@@ -5,6 +5,7 @@ import DB from '../../db'
 export interface ListCommandArgs {
   db: DB
   yargs: Argv
+  ago?: boolean
   all?: boolean
   help?: boolean
   since?: string

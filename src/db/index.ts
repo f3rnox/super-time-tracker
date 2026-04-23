@@ -473,11 +473,14 @@ class DB {
     let description = descriptionArg as string
     let tags: string[] = tagsArg ?? []
 
-    if (_isEmpty(tags) && !_isUndefined(input)) {
+    if (!_isUndefined(input)) {
       const res = U.parseEntryFromInput(id, input, start)
 
-      tags = res.tags
-      description = res.description
+      if (_isEmpty(description)) {
+        description = res.description
+      }
+
+      tags = Array.from(new Set([...tags, ...res.tags]))
     }
 
     const entry = DB.genSheetEntry(id, description, start, end, tags)

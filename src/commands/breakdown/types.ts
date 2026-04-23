@@ -10,8 +10,12 @@ export interface BreakdownCommandArgs {
   all?: boolean
   help?: boolean
   since?: string
+  today?: boolean
+  filter?: string
   sheets?: string[]
   humanize?: boolean
+  allSheets?: boolean
+  yesterday?: boolean
 }
 
 export interface BreakdownResult {

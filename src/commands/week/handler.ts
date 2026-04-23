@@ -1,6 +1,7 @@
 import sAgo from 's-ago'
 import _sum from 'lodash/sum'
 import weekday from 'weekday'
+import parseDate from 'time-speak'
 import _isEmpty from 'lodash/isEmpty'
 import _isUndefined from 'lodash/isUndefined'
 
@@ -19,6 +20,7 @@ import {
 import {
   getDurationLangString,
   getEntryDurationInDay,
+  getSheetsWithEntriesSinceDate,
   getSheetsWithEntriesInLastWeek
 } from '../../utils'
 
@@ -29,22 +31,49 @@ import {
   type WeekCommandArgs
 } from './types'
 
+/**
+ * Prints a breakdown of tracked time across the last week (or any period set
+ * via `--since`) grouped by sheet and day, or aggregated into per-day totals.
+ */
 const handler = (args: WeekCommandArgs): void => {
-  const { ago, db, help, humanize, sheets: inputSheets, total, yargs } = args
+  const {
+    ago,
+    all,
+    allSheets,
+    db,
+    filter,
+    help,
+    humanize,
+    sheets: inputSheets,
+    since: inputSince,
+    total,
+    yargs
+  } = args
 
   if (help) {
     yargs.showHelp()
     process.exit(0)
   }
 
+  const showAll = all === true || allSheets === true
   const selectedSheets: TimeSheet[] =
-    _isUndefined(inputSheets) || _isEmpty(inputSheets)
+    showAll || _isUndefined(inputSheets) || _isEmpty(inputSheets)
       ? db.getAllSheets()
       : inputSheets.map((name: string): TimeSheet => db.getSheet(name))
 
-  const lastWeekDate = new Date(Date.now() - getDaysMS(7))
-  const lastWeekThroughTodayDayCount = 8
-  const relevantSheets = getSheetsWithEntriesInLastWeek(selectedSheets)
+  const hasExplicitSince = !_isUndefined(inputSince) && !_isEmpty(inputSince)
+  const sinceDate = hasExplicitSince
+    ? new Date(+parseDate(inputSince))
+    : new Date(Date.now() - getDaysMS(7))
+  const sinceDateDayCount = hasExplicitSince
+    ? Math.max(1, Math.ceil((Date.now() - +sinceDate) / getDaysMS(1)) + 1)
+    : 8
+  const relevantSheets = hasExplicitSince
+    ? getSheetsWithEntriesSinceDate(selectedSheets, sinceDate)
+    : getSheetsWithEntriesInLastWeek(selectedSheets)
+
+  const filterText =
+    _isUndefined(filter) || _isEmpty(filter) ? null : filter.toLowerCase()
   const results: WeekdayResults = {}
 
   let totalDuration = 0
@@ -52,10 +81,16 @@ const handler = (args: WeekCommandArgs): void => {
 
   relevantSheets.forEach(({ entries, name }) => {
     const sheetResults: Record<string, WeekdayResult> = {}
+    const applicableEntries =
+      filterText === null
+        ? entries
+        : entries.filter(({ description }) =>
+            description.toLowerCase().includes(filterText)
+          )
 
-    entries.forEach((entry: TimeSheetEntry) => {
-      for (let i = 0; i < lastWeekThroughTodayDayCount; i += 1) {
-        const date = new Date(+lastWeekDate + i * getDaysMS(1))
+    applicableEntries.forEach((entry: TimeSheetEntry) => {
+      for (let i = 0; i < sinceDateDayCount; i += 1) {
+        const date = new Date(+sinceDate + i * getDaysMS(1))
         const dateKey = date.toLocaleDateString()
         const duration = getEntryDurationInDay(entry, date)
 
@@ -83,12 +118,10 @@ const handler = (args: WeekCommandArgs): void => {
     results[name] = sheetResults
   })
 
-  const lastWeekDateUI = ago
-    ? sAgo(lastWeekDate)
-    : lastWeekDate.toLocaleDateString()
+  const sinceDateUI = ago ? sAgo(sinceDate) : sinceDate.toLocaleDateString()
 
   log(
-    `${clText('* Week Report [showing data since')} ${clDate(lastWeekDateUI)}${clText(']')}`
+    `${clText('* Week Report [showing data since')} ${clDate(sinceDateUI)}${clText(']')}`
   )
   log(
     `${clText('* Total duration:')} ${clDuration(

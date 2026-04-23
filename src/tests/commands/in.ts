@@ -99,4 +99,81 @@ describe('commands:in:handler', () => {
     expect(entry.end).toBeNull()
     expect(entry.description).toBe('test description')
   }, 10000)
+
+  it('creates a new sheet when --sheet targets a nonexistent sheet', async () => {
+    const testDB = _cloneDeep(db)
+
+    if (testDB.db === null) {
+      throw new Error('Test DB is null')
+    }
+
+    await expect(
+      handler(
+        getArgs({
+          db: testDB,
+          description: ['hello', 'world'],
+          sheet: 'new-sheet'
+        })
+      )
+    ).resolves.toBeUndefined()
+
+    const sheet = testDB.getSheet('new-sheet')
+
+    expect(sheet.entries).toHaveLength(1)
+    expect(sheet.entries[0].description).toBe('hello world')
+  }, 10000)
+
+  it('merges explicit --tags with tags parsed from the description', async () => {
+    const sheet = DB.genSheet('test-sheet')
+    const testDB = _cloneDeep(db)
+
+    if (testDB.db === null) {
+      throw new Error('Test DB is null')
+    }
+
+    testDB.db.sheets.push(sheet)
+    testDB.db.activeSheetName = sheet.name
+
+    await expect(
+      handler(
+        getArgs({
+          db: testDB,
+          description: ['ship', '@cli'],
+          tags: ['@priority', '@cli']
+        })
+      )
+    ).resolves.toBeUndefined()
+
+    const [entry] = sheet.entries
+
+    expect(entry.description).toBe('ship')
+    expect(entry.tags.sort()).toEqual(['@cli', '@priority'])
+  }, 10000)
+
+  it('attaches an initial note from --note to the new entry', async () => {
+    const sheet = DB.genSheet('test-sheet')
+    const testDB = _cloneDeep(db)
+
+    if (testDB.db === null) {
+      throw new Error('Test DB is null')
+    }
+
+    testDB.db.sheets.push(sheet)
+    testDB.db.activeSheetName = sheet.name
+
+    await expect(
+      handler(
+        getArgs({
+          db: testDB,
+          description: ['work'],
+          note: 'kickoff'
+        })
+      )
+    ).resolves.toBeUndefined()
+
+    const [entry] = sheet.entries
+
+    expect(entry.notes).toHaveLength(1)
+    expect(entry.notes[0].text).toBe('kickoff')
+  }, 10000)
 })

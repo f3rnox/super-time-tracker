@@ -48,4 +48,34 @@ describe('commands:today:handler', () => {
 
     expect(() => handler(getArgs())).not.toThrow()
   })
+
+  it('honors --filter to exclude non-matching entries', () => {
+    const startedToday = new Date(Date.now() - 20 * 60 * 1000)
+    const entryA = DB.genSheetEntry(0, 'review pr', startedToday)
+    const entryB = DB.genSheetEntry(1, 'write docs', new Date())
+    const sheet = DB.genSheet('test-sheet', [entryA, entryB], entryA.id)
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    expect(() => handler(getArgs({ filter: 'docs' }))).not.toThrow()
+    expect(() => handler(getArgs({ filter: 'nonexistent' }))).toThrow(
+      'No entries for today'
+    )
+  })
+
+  it('accepts --concise without throwing', () => {
+    const startedToday = new Date(Date.now() - 10 * 60 * 1000)
+    const entry = DB.genSheetEntry(0, 'focus work', startedToday)
+    const sheet = DB.genSheet('test-sheet', [entry], entry.id)
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    expect(() => handler(getArgs({ concise: true }))).not.toThrow()
+  })
 })

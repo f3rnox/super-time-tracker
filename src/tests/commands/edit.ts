@@ -129,6 +129,51 @@ describe('commands:edit:handler', () => {
     expect(+(entry.end === null ? 0 : entry.end)).toBe(+newEndDate)
   }, 10000)
 
+  it('edits tags via --tags', async () => {
+    const entry = DB.genSheetEntry(0, 'desc', new Date(), new Date(), ['@old'])
+    const sheet = DB.genSheet('test-sheet-a', [entry])
+
+    db.db?.sheets.push(sheet)
+
+    await handler(
+      getArgs({
+        entry: 0,
+        sheet: 'test-sheet-a',
+        tags: ['@new', '@another']
+      })
+    )
+
+    expect(entry.tags).toEqual(['@new', '@another'])
+  }, 10000)
+
+  it('applies description, start, end, and tags in a single call', async () => {
+    const start = new Date(Date.now() - 60 * 60 * 1000)
+    const end = new Date()
+    const entry = DB.genSheetEntry(0, 'old', start, end, ['@legacy'])
+    const sheet = DB.genSheet('test-sheet-a', [entry])
+
+    db.db?.sheets.push(sheet)
+
+    const newStart = new Date(Date.now() - 30 * 60 * 1000)
+    const newEnd = new Date(Date.now() - 15 * 60 * 1000)
+
+    await handler(
+      getArgs({
+        description: 'new',
+        end: newEnd.toISOString(),
+        entry: 0,
+        sheet: 'test-sheet-a',
+        start: newStart.toISOString(),
+        tags: ['@shipped']
+      })
+    )
+
+    expect(entry.description).toBe('new')
+    expect(+entry.start).toBe(+newStart)
+    expect(+(entry.end as Date)).toBe(+newEnd)
+    expect(entry.tags).toEqual(['@shipped'])
+  }, 10000)
+
   it('deletes the specified sheet if requested', async () => {
     const sheetA = DB.genSheet('test-sheet-a')
     const sheetB = DB.genSheet('test-sheet-b')

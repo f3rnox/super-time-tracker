@@ -2,9 +2,12 @@ import {
   setup,
   AgoOption,
   HelpOption,
+  SinceOption,
   TotalOption,
+  FilterOption,
   SheetsOption,
-  HumanizeOption
+  HumanizeOption,
+  AllSheetsOption
 } from '../../options'
 
 export const CONFIG = {
@@ -16,6 +19,9 @@ export const CONFIG = {
     AgoOption,
     HumanizeOption,
     SheetsOption,
+    AllSheetsOption,
+    SinceOption,
+    FilterOption,
     HelpOption
   ])
 }

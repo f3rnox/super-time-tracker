@@ -7,4 +7,6 @@ export interface OutCommandArgs {
   yargs: Argv
   at?: string[]
   help?: boolean
+  note?: string
+  sheet?: string
 }

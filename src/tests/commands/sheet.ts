@@ -97,4 +97,32 @@ describe('commands:sheet:handler', () => {
     expect(newSheet?.activeEntryID).toBeNull()
     expect(newSheet?.entries).toHaveLength(0)
   }, 10000)
+
+  it('renames a sheet via --rename and keeps it as the active sheet', async () => {
+    const sheet = DB.genSheet('old-name')
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    await handler(getArgs({ name: 'old-name', rename: 'brand-new' }))
+
+    expect(sheet.name).toBe('brand-new')
+    expect(db.getActiveSheetName()).toBe('brand-new')
+  }, 10000)
+
+  it('renames the active sheet when no name is given', async () => {
+    const sheet = DB.genSheet('legacy')
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    await handler(getArgs({ rename: 'renamed' }))
+
+    expect(sheet.name).toBe('renamed')
+    expect(db.getActiveSheetName()).toBe('renamed')
+  }, 10000)
 })

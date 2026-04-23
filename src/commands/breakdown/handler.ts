@@ -2,12 +2,14 @@ import sAgo from 's-ago'
 import _map from 'lodash/map'
 import weekday from 'weekday'
 import parseDate from 'time-speak'
+import _isEmpty from 'lodash/isEmpty'
 import _isUndefined from 'lodash/isUndefined'
 import { eachDayOfInterval } from 'date-fns'
 
 import log from '../../log'
 import { populateResults } from './utils'
 import { printJustifiedContent } from '../../print'
+import { getStartOfDay, getYesterday } from '../../dates'
 import { type TimeSheet, type TimeSheetEntry } from '../../types'
 import { type BreakdownCommandArgs, type BreakdownResults } from './types'
 import {
@@ -99,14 +101,23 @@ const accumulateEntryResults = (
   }
 }
 
+/**
+ * Prints a per-day, per-weekday, and per-hour breakdown of tracked time.
+ * Supports date scopes (`--today`, `--yesterday`, `--since`), sheet scoping
+ * (`--all-sheets` or positional sheets), and description filtering.
+ */
 const handler = (args: BreakdownCommandArgs): void => {
   const {
     db,
     ago,
     all,
+    allSheets,
+    filter,
     help,
+    today,
     yargs,
     humanize,
+    yesterday,
     since: inputSince,
     sheets: inputSheets
   } = args
@@ -116,8 +127,18 @@ const handler = (args: BreakdownCommandArgs): void => {
     process.exit(0)
   }
 
+  const dateFlagCount = [
+    today,
+    yesterday,
+    !_isUndefined(inputSince) && !_isEmpty(inputSince)
+  ].filter(Boolean).length
+
+  if (dateFlagCount > 1) {
+    throw new Error('Cannot combine --since, --today, and --yesterday')
+  }
+
   let targetSheets: TimeSheet[]
-  if (all) {
+  if (all === true || allSheets === true) {
     targetSheets = db.getAllSheets()
   } else if (_isUndefined(inputSheets)) {
     targetSheets = [db.getActiveSheet()]
@@ -126,14 +147,34 @@ const handler = (args: BreakdownCommandArgs): void => {
   }
 
   const sheetNames = _map(targetSheets, 'name')
-  const since = _isUndefined(inputSince)
-    ? new Date(0)
-    : new Date(+parseDate(inputSince))
+  let since: Date
+  if (today) {
+    since = getStartOfDay()
+  } else if (yesterday) {
+    since = getYesterday()
+  } else if (!_isUndefined(inputSince) && !_isEmpty(inputSince)) {
+    since = new Date(+parseDate(inputSince))
+  } else {
+    since = new Date(0)
+  }
 
   const resultsPerDay: BreakdownResults = {}
   const resultsPerHour: BreakdownResults = {}
   const resultsPerWeekday: BreakdownResults = {}
-  const filteredSheets = getSheetsWithEntriesSinceDate(targetSheets, since)
+  const sheetsInRange = getSheetsWithEntriesSinceDate(targetSheets, since)
+  const filterText =
+    _isUndefined(filter) || _isEmpty(filter) ? null : filter.toLowerCase()
+  const filteredSheets: TimeSheet[] =
+    filterText === null
+      ? sheetsInRange
+      : sheetsInRange
+          .map(({ entries, ...rest }) => ({
+            ...rest,
+            entries: entries.filter(({ description }) =>
+              description.toLowerCase().includes(filterText)
+            )
+          }))
+          .filter(({ entries }) => entries.length > 0)
 
   for (const sheet of filteredSheets) {
     for (const entry of sheet.entries) {

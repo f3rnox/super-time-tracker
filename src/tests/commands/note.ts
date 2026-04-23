@@ -91,4 +91,60 @@ describe('commands:note:handler', () => {
     expect(updatedEntry.notes[1].text).toBe('second note')
     expect(updatedEntry.notes[1].timestamp).toBeInstanceOf(Date)
   }, 10000)
+
+  it('appends a note to a non-active entry specified by --entry', async () => {
+    const entryA = DB.genSheetEntry(0, 'first', new Date(), new Date())
+    const entryB = DB.genSheetEntry(1, 'second', new Date())
+    const sheet = DB.genSheet('test-sheet', [entryA, entryB], entryB.id)
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    await expect(
+      handler(getArgs({ entry: 0, note: ['retro'] }))
+    ).resolves.toBeUndefined()
+
+    expect(entryA.notes).toHaveLength(1)
+    expect(entryA.notes[0].text).toBe('retro')
+    expect(entryB.notes).toHaveLength(0)
+  }, 10000)
+
+  it('appends a note to an entry on a non-active sheet via --sheet', async () => {
+    const activeSheet = DB.genSheet('active-sheet')
+    const targetEntry = DB.genSheetEntry(0, 'done', new Date(), new Date())
+    const targetSheet = DB.genSheet('target-sheet', [targetEntry])
+
+    if (db.db !== null) {
+      db.db.sheets.push(activeSheet, targetSheet)
+      db.db.activeSheetName = activeSheet.name
+    }
+
+    await expect(
+      handler(getArgs({ entry: 0, note: ['later'], sheet: 'target-sheet' }))
+    ).resolves.toBeUndefined()
+
+    expect(targetEntry.notes).toHaveLength(1)
+    expect(targetEntry.notes[0].text).toBe('later')
+  }, 10000)
+
+  it('uses --at to set the note timestamp', async () => {
+    const entry = DB.genSheetEntry(0, 'desc', new Date())
+    const sheet = DB.genSheet('test-sheet', [entry], entry.id)
+
+    if (db.db !== null) {
+      db.db.sheets.push(sheet)
+      db.db.activeSheetName = sheet.name
+    }
+
+    const noteAt = new Date(Date.now() - 60 * 60 * 1000)
+
+    await expect(
+      handler(getArgs({ at: noteAt.toISOString(), note: ['backdated'] }))
+    ).resolves.toBeUndefined()
+
+    expect(entry.notes).toHaveLength(1)
+    expect(+entry.notes[0].timestamp).toBe(+noteAt)
+  }, 10000)
 })

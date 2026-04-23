@@ -8,8 +8,12 @@ import log from '../../log'
 import { type OutCommandArgs } from './types'
 import { clDuration, clHighlight, clSheet, clText } from '../../color'
 
+/**
+ * Checks out of the active entry for the active or specified sheet, optionally
+ * recording the end time from a natural-language date and attaching a final note.
+ */
 const handler = async (args: OutCommandArgs): Promise<void> => {
-  const { at, db, help, yargs } = args
+  const { at, db, help, note, sheet: inputSheet, yargs } = args
 
   if (help) {
     yargs.showHelp()
@@ -24,7 +28,10 @@ const handler = async (args: OutCommandArgs): Promise<void> => {
     endDate = new Date(+parseDate(atString))
   }
 
-  const sheet = db.getActiveSheet()
+  const sheet =
+    _isUndefined(inputSheet) || _isEmpty(inputSheet)
+      ? db.getActiveSheet()
+      : db.getSheet(inputSheet)
   const { activeEntryID, name: sheetName } = sheet
 
   if (activeEntryID === null || !_isFinite(activeEntryID)) {
@@ -35,21 +42,26 @@ const handler = async (args: OutCommandArgs): Promise<void> => {
 
   if (_isUndefined(entry)) {
     throw new Error(`No entry found with ID ${activeEntryID}`)
-  } else {
-    await db.checkOutOfSheetEntry(sheet, entry, endDate)
-
-    const { description, end, start } = entry
-    const descriptionUI = clText(description)
-    const durationUI = clDuration(
-      formatDuration(end === null ? Date.now() - +start : +end - +start)
-    )
-
-    log(
-      `${clHighlight('Checked out of sheet')} ${clSheet(
-        sheetName
-      )}: ${descriptionUI} [${durationUI}]`
-    )
   }
+
+  await db.checkOutOfSheetEntry(sheet, entry, endDate)
+
+  if (!_isUndefined(note) && !_isEmpty(note)) {
+    entry.notes.push({ timestamp: new Date(), text: note })
+    await db.save()
+  }
+
+  const { description, end, start } = entry
+  const descriptionUI = clText(description)
+  const durationUI = clDuration(
+    formatDuration(end === null ? Date.now() - +start : +end - +start)
+  )
+
+  log(
+    `${clHighlight('Checked out of sheet')} ${clSheet(
+      sheetName
+    )}: ${descriptionUI} [${durationUI}]`
+  )
 }
 
 export default handler

@@ -1,9 +1,12 @@
 import {
   setup,
+  EndOption,
   HelpOption,
   NameOption,
-  SheetOption,
+  TagsOption,
+  StartOption,
   EntryOption,
+  SheetOption,
   DeleteOption,
   DescriptionOption
 } from '../../options'
@@ -17,6 +20,9 @@ export const CONFIG = {
     NameOption,
     EntryOption,
     DescriptionOption,
+    StartOption,
+    EndOption,
+    TagsOption,
     DeleteOption,
     HelpOption
   ])

@@ -6,10 +6,14 @@ export interface WeekCommandArgs {
   db: DB
   yargs: Argv
   ago?: boolean
+  all?: boolean
   help?: boolean
+  since?: string
   total?: boolean
+  filter?: string
   sheets?: string[]
   humanize?: boolean
+  allSheets?: boolean
 }
 
 export interface WeekdayResult {
