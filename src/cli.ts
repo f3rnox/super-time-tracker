@@ -60,13 +60,13 @@ const runCli = async (): Promise<void> => {
     .version()
     .recommendCommands()
     .example(
-      'tt in --at "20 minutes ago" fixing a bug',
+      'stt in --at "20 minutes ago" fixing a bug',
       'Check in at a custom time'
     )
-    .example('tt out --at "5 minutes ago"', 'Check out at a custom time')
-    .example('tt list --today --all', 'View all entries from today')
-    .example('tt b', 'Show a breakdown of your activity')
-    .example('tt today --all', 'View activity for the current day')
+    .example('stt out --at "5 minutes ago"', 'Check out at a custom time')
+    .example('stt list --today --all', 'View all entries from today')
+    .example('stt b', 'Show a breakdown of your activity')
+    .example('stt today --all', 'View activity for the current day')
 
   commands.forEach((def) => {
     y.command(def as unknown as CommandModule)
