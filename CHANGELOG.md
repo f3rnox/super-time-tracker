@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.53.4](https://github.com/f3rnox/super-time/compare/v1.53.3...v1.53.4) (2026-04-29)
+
+
+### Bug Fixes
+
+* rm node versions 16 and 18 from gh workflows ([ffce62f](https://github.com/f3rnox/super-time/commit/ffce62f4089e492366a6cd49c77d1cc0f2c7ab4a))
+
 ### [1.53.3](https://github.com/f3rnox/super-time/compare/v1.53.2...v1.53.3) (2026-04-29)
 
 
